@@ -53,7 +53,7 @@ EOF
 
 upload_proxy() {
     # Đường dẫn đầy đủ của proxy.txt
-    local proxy_file_path="/home/proxy-installer/proxy.txt"
+    local proxy_file_path="${WORKDIR}/proxy.txt"
     
     # In ra giá trị của biến proxy_file_path
     echo "$proxy_file_path"
