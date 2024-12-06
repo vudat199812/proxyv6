@@ -46,9 +46,11 @@ EOF
 }
 
 gen_proxy_file_for_user() {
-    cat >proxy.txt <<EOF
-$(awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2 }' ${WORKDATA})
-EOF
+    echo "Đang tạo proxy.txt từ ${WORKDATA}"
+    cat >${WORKDIR}/proxy.txt <<EOF
+    $(awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2 }' ${WORKDATA})
+    EOF
+    echo "Tệp proxy.txt đã được tạo tại ${WORKDIR}/proxy.txt"
 }
 
 upload_proxy() {
