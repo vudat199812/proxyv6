@@ -52,15 +52,13 @@ EOF
 }
 
 upload_proxy() {
-    local PASS=$(random)
-    zip --password $PASS proxy.zip proxy.txt
-    URL=$(curl -s --upload-file proxy.zip https://transfer.sh/proxy.zip)
-
-    echo "Proxy is ready! Format IP:PORT:LOGIN:PASS"
-    echo "Download zip archive from: ${URL}"
-    echo "Password: ${PASS}"
-
+    # Đường dẫn đầy đủ của proxy.txt
+    local proxy_file_path="${WORKDIR}/proxy.txt"
+    
+    # In ra giá trị của biến proxy_file_path
+    echo "Đường dẫn đầy đủ của proxy.txt là: $proxy_file_path"
 }
+
 gen_data() {
     seq $FIRST_PORT $LAST_PORT | while read port; do
         echo "usr$(random)/pass$(random)/$IP4/$port/$(gen64 $IP6)"
