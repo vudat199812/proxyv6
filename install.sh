@@ -23,7 +23,7 @@ install_3proxy() {
     cp ./scripts/init.d/3proxy.sh /etc/init.d/3proxy
     cp ./scripts/3proxy.service /etc/init.d/3proxy
     chmod +x /etc/init.d/3proxy
-    chkconfig 3proxy on
+    systemctl enable 3proxy
     cd $WORKDIR
 }
 
