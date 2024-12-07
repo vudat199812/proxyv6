@@ -1,5 +1,4 @@
 #!/bin/sh
-#bash <(curl -s "https://raw.githubusercontent.com/vudat199812/proxyv6/main/install.sh")
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
 	echo
