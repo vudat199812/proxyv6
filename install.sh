@@ -25,6 +25,7 @@ install_3proxy() {
     cd $WORKDIR
 }
 
+
 gen_3proxy() {
     cat <<EOF
 daemon
