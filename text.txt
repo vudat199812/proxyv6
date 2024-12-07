@@ -1,2 +1,3 @@
 sudo yum install -y ./3proxy-0.9.4.x86_64.rpm
 bash <(curl -s "https://raw.githubusercontent.com/vudat199812/proxyv6/main/install.sh")
+sudo cp ./scripts/init.d/proxy.sh /etc/init.d/3proxy
