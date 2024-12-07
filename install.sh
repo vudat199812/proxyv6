@@ -1,4 +1,5 @@
 #!/bin/sh
+#bash <(curl -s "https://raw.githubusercontent.com/vudat199812/proxyv6/main/install.sh")
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
 	echo
@@ -17,9 +18,7 @@ install_3proxy() {
     wget -qO- $URL | bsdtar -xvf-
     cd 3proxy-3proxy-0.8.6
     make -f Makefile.Linux
-    mkdir -p /usr/local/etc/3proxy/bin
-    mkdir -p /usr/local/etc/3proxy/logs
-    mkdir -p /usr/local/etc/3proxy/stat
+    mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp src/3proxy /usr/local/etc/3proxy/bin/
     cp ./scripts/rc.d/proxy.sh /etc/init.d/3proxy
     chmod +x /etc/init.d/3proxy
