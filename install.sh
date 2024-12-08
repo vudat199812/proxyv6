@@ -93,7 +93,7 @@ yum -y install gcc net-tools bsdtar zip >/dev/null
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
 systemctl start rc-local
-bash /etc/rc.local
+bash /etc/rc.d/rc.local
 check_iptables_install
 install_3proxy
 
