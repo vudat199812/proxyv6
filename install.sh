@@ -18,6 +18,7 @@ clear_proxy_and_file(){
 	fi
 	rm -rf /home/proxy-installer
  	rm -rf /usr/local/etc/3proxy/bin/3proxy
+  	sleep 3
 }
 
 random() {
