@@ -123,7 +123,7 @@ touch /etc/rc.d/rc.local
 cat >>/etc/rc.d/rc.local <<EOF
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-ulimit -n 20048
+ulimit -n 10048
 systemctl start 3proxy
 EOF
 bash /etc/rc.d/rc.local
