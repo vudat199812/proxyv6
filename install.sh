@@ -95,7 +95,7 @@ yum -y install gcc net-tools bsdtar zip >/dev/null
 check_iptables_install
 install_3proxy
 
-chmod +x /etc/rc.d
+
 echo "working folder = /home/proxy-installer"
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
@@ -126,9 +126,10 @@ bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 systemctl start 3proxy
 EOF
+chmod +x /etc/rc.d/rc.local
 bash /etc/rc.d/rc.local
 
-chmod +x /etc/rc.d/rc.local
+
 systemctl enable rc-local
 systemctl start rc-local
 gen_proxy_file_for_user
