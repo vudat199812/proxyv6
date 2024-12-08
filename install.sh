@@ -33,7 +33,7 @@ install_3proxy() {
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cp ./scripts/3proxy.service /etc/systemd/system/3proxy.service
-    
+    systemctl daemon-reload
     cd $WORKDIR
 }
 
