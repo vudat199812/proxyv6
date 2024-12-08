@@ -115,7 +115,7 @@ LAST_PORT=$(($FIRST_PORT + $COUNT))
 gen_data >$WORKDIR/data.txt
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
-chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
+
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
@@ -125,7 +125,7 @@ bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 /usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
 EOF
-
+chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
 gen_proxy_file_for_user
 
