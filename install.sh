@@ -130,7 +130,4 @@ EOF
 chmod +x /etc/rc.d/rc.local
 bash /etc/rc.d/rc.local
 
-systemctl daemon-reload
-systemctl enable rc-local
-systemctl start rc-local
 gen_proxy_file_for_user
