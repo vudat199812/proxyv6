@@ -10,6 +10,20 @@ check_iptables_install() {
         echo "iptables đã được cài đặt."
     fi
 }
+clear_proxy_and_file(){
+	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
+	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
+	else
+	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
+	fi
+	
+	if rm -f /home/proxy-installer/data.txt /home/proxy-installer/proxy.txt; then
+	    echo "Đã xóa tệp data.txt và proxy.txt thành công."
+	else
+	    echo "Lỗi khi xóa tệp, tiếp tục chạy lệnh tiếp theo."
+	fi
+
+}
 
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
@@ -60,13 +74,7 @@ EOF
 }
 
 upload_proxy() {
-    local PASS=$(random)
-    zip --password $PASS proxy.zip proxy.txt
-    URL=$(curl -s --upload-file proxy.zip https://transfer.sh/proxy.zip)
-
-    echo "Proxy is ready! Format IP:PORT:LOGIN:PASS"
-    echo "Download zip archive from: ${URL}"
-    echo "Password: ${PASS}"
+    echo "upload"
 
 }
 gen_data() {
@@ -92,6 +100,7 @@ chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
 systemctl start rc-local
 check_iptables_install
+clear_proxy_and_file
 install_3proxy
 
 echo "working folder = /home/proxy-installer"
