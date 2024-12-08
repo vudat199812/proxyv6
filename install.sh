@@ -31,8 +31,11 @@ install_3proxy() {
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
+    cp ./scripts/rc.d/3proxy.sh /etc/init.d/3proxy
     cd $WORKDIR
 }
+
+
 gen_3proxy() {
     cat <<EOF
 daemon
@@ -87,7 +90,9 @@ EOF
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
 chmod +x /etc/rc.d/rc.local
-
+systemctl enable rc-local
+systemctl start rc-local
+bash /etc/rc.local
 check_iptables_install
 install_3proxy
 
@@ -110,17 +115,16 @@ LAST_PORT=$(($FIRST_PORT + $COUNT))
 gen_data >$WORKDIR/data.txt
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
-chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
+chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
+
+gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
 cat >>/etc/rc.d/rc.local <<EOF
+bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 /usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
 EOF
 
-chmod +x /etc/rc.d/rc.local
-systemctl enable rc-local
-systemctl start rc-local
-
-
+bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
