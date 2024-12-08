@@ -11,7 +11,7 @@ check_iptables_install() {
     fi
 }
 clear_proxy_and_file(){
-	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | while read addr; do sudo ip -6 addr del $addr dev eth0; then
+	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | while read addr; do sudo ip -6 addr del $addr dev eth0; done; then
 	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
 	else
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
