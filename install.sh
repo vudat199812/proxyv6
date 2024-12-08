@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
 	echo
@@ -11,21 +11,20 @@ gen64() {
 	}
 	echo "$1:$(ip64):$(ip64):$(ip64):$(ip64)"
 }
-
 install_3proxy() {
-    echo "Installing 3proxy..."
+    echo "installing 3proxy"
     URL="https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz"
-    wget -qO- $URL | tar -xzf -
+    wget -qO- $URL | bsdtar -xvf-
     cd 3proxy-0.9.4
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
-    cp ./scripts/rc.d/proxy.sh /etc/rc.d/init.d/3proxy
-    chmod +x /etc/rc.d/init.d/3proxy
-    chkconfig --add 3proxy
-    chkconfig 3proxy on
-    cd "$WORKDIR" || exit
+    mkdir -p /etc/init.d/3proxy
+    cp ./scripts/init.d/3proxy.sh /etc/init.d/3proxy
+    chmod +x /etc/rc.d/rc.local
+    cd $WORKDIR
 }
+
 
 gen_3proxy() {
     cat <<EOF
@@ -37,9 +36,7 @@ setgid 65535
 setuid 65535
 flush
 auth strong
-
 users $(awk -F "/" 'BEGIN{ORS="";} {print $1 ":CL:" $2 " "}' ${WORKDATA})
-
 $(awk -F "/" '{print "auth strong\n" \
 "allow " $1 "\n" \
 "proxy -6 -n -a -p" $4 " -i" $3 " -e"$5"\n" \
@@ -61,17 +58,17 @@ upload_proxy() {
     echo "Proxy is ready! Format IP:PORT:LOGIN:PASS"
     echo "Download zip archive from: ${URL}"
     echo "Password: ${PASS}"
-}
 
+}
 gen_data() {
-    seq $FIRST_PORT $LAST_PORT | while read -r port; do
+    seq $FIRST_PORT $LAST_PORT | while read port; do
         echo "usr$(random)/pass$(random)/$IP4/$port/$(gen64 $IP6)"
     done
 }
 
 gen_iptables() {
     cat <<EOF
-    $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 " -m state --state NEW -j ACCEPT"}' ${WORKDATA})
+    $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
 EOF
 }
 
@@ -80,32 +77,31 @@ gen_ifconfig() {
 $(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
-
-echo "Installing necessary packages..."
-dnf install -y gcc net-tools bsdtar zip curl wget iptables-services >/dev/null
+echo "installing apps"
+yum -y install gcc net-tools bsdtar zip >/dev/null
 
 install_3proxy
 
-echo "Working folder = /home/proxy-installer"
+echo "working folder = /home/proxy-installer"
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
-mkdir -p $WORKDIR && cd "$WORKDIR" || exit
+mkdir $WORKDIR && cd $_
 
 IP4=$(curl -4 -s icanhazip.com)
 IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
 
-echo "Internal IP = ${IP4}. External subnet for IPv6 = ${IP6}"
+echo "Internal ip = ${IP4}. Exteranl sub for ip6 = ${IP6}"
 
-echo "How many proxies do you want to create? Example: 500"
-read -r COUNT
+echo "How many proxy do you want to create? Example 500"
+read COUNT
 
 FIRST_PORT=10000
-LAST_PORT=$((FIRST_PORT + COUNT))
+LAST_PORT=$(($FIRST_PORT + $COUNT))
 
-gen_data >"$WORKDIR/data.txt"
-gen_iptables >"$WORKDIR/boot_iptables.sh"
-gen_ifconfig >"$WORKDIR/boot_ifconfig.sh"
-chmod +x ${WORKDIR}/boot_*.sh
+gen_data >$WORKDIR/data.txt
+gen_iptables >$WORKDIR/boot_iptables.sh
+gen_ifconfig >$WORKDIR/boot_ifconfig.sh
+chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
@@ -115,8 +111,6 @@ bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 service 3proxy start
 EOF
-
-chmod +x /etc/rc.local
 
 bash /etc/rc.local
 
