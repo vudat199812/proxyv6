@@ -85,6 +85,10 @@ EOF
 
 gen_ifconfig() {
     cat <<EOF
+# Xóa tất cả địa chỉ IPv6 cũ trên giao diện eth0
+ip -6 addr show dev eth0 | grep "inet6" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0
+
+# Thêm địa chỉ IPv6 mới
 $(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
