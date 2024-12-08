@@ -116,7 +116,7 @@ gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh etc/rc.d
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
-
+touch /etc/rc.d/rc.local
 cat >>/etc/rc.d/rc.local <<EOF
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
