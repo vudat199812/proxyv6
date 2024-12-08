@@ -33,8 +33,6 @@ install_3proxy() {
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cd $WORKDIR
 }
-
-
 gen_3proxy() {
     cat <<EOF
 daemon
