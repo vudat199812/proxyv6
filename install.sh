@@ -11,19 +11,35 @@ check_iptables_install() {
     fi
 }
 clear_proxy_and_file(){
-	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | while read addr; do sudo ip -6 addr del $addr dev eth0; done; then
-	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
-	else
-	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
-	fi
-	rm -rf /home/proxy-installer
- 	rm -rf /usr/local/etc/3proxy/bin/3proxy
-  	sleep 3
-}
+    # Kiểm tra và xóa các địa chỉ IPv6 không mong muốn
+    ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | while read addr; do
+        echo "Đang xóa địa chỉ IPv6: $addr"
+        sudo ip -6 addr del $addr dev eth0
+        if [ $? -eq 0 ]; then
+            echo "Đã xóa địa chỉ IPv6: $addr thành công."
+        else
+            echo "Lỗi khi xóa địa chỉ IPv6: $addr."
+        fi
+    done
 
-random() {
-	tr </dev/urandom -dc A-Za-z0-9 | head -c5
-	echo
+    # Kiểm tra sự tồn tại của thư mục và tệp trước khi xóa
+    if [ -d "/home/proxy-installer" ]; then
+        echo "Đang xóa thư mục /home/proxy-installer..."
+        sudo rm -rf /home/proxy-installer
+    else
+        echo "/home/proxy-installer không tồn tại."
+    fi
+
+    if [ -f "/usr/local/etc/3proxy/bin/3proxy" ]; then
+        echo "Đang xóa tệp /usr/local/etc/3proxy/bin/3proxy..."
+        sudo rm -rf /usr/local/etc/3proxy/bin/3proxy
+    else
+        echo "/usr/local/etc/3proxy/bin/3proxy không tồn tại."
+    fi
+
+    # Dừng 3 giây để chắc chắn các thao tác trên hoàn tất
+    echo "Chờ 3 giây..."
+    sleep 3
 }
 
 array=(1 2 3 4 5 6 7 8 9 0 a b c d e f)
