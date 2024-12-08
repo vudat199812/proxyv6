@@ -127,7 +127,7 @@ bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 /usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
 EOF
-chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
+chmod +x ${WORKDIR}/boot_*.sh
 
 gen_proxy_file_for_user
 systemctl start 3proxy
