@@ -17,6 +17,7 @@ clear_proxy_and_file(){
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
 	rm -rf /home/proxy-installer
+ 	rm -rf /usr/local/etc/3proxy/bin/3proxy
 }
 
 random() {
