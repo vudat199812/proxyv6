@@ -111,7 +111,6 @@ yum -y install gcc net-tools bsdtar zip >/dev/null
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
 systemctl start rc-local
-check_iptables_install
 clear_proxy_and_file
 install_3proxy
 
@@ -132,7 +131,6 @@ FIRST_PORT=10000
 LAST_PORT=$(($FIRST_PORT + $COUNT))
 
 gen_data >$WORKDIR/data.txt
-gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
