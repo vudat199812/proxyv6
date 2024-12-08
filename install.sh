@@ -25,7 +25,6 @@ install_3proxy() {
     chkconfig --add 3proxy
     chkconfig 3proxy on
     cd "$WORKDIR" || exit
-    
 }
 
 gen_3proxy() {
