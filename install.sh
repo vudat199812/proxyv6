@@ -33,6 +33,7 @@ install_3proxy() {
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cp ./scripts/init.d/3proxy.sh /etc/rc.d/init.d/3proxy
     chmod +x /etc/rc.d/init.d/3proxy
+    chkconfig 3proxy on
     cd $WORKDIR
 }
 
