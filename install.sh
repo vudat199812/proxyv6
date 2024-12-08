@@ -33,7 +33,7 @@ install_3proxy() {
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cp ./scripts/3proxy.service /etc/systemd/system/3proxy.service
-    systemctl daemon-reload
+    
     cd $WORKDIR
 }
 
@@ -118,7 +118,7 @@ gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
-
+systemctl daemon-reload
 cat >>/etc/rc.d/rc.local <<EOF
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
