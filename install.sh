@@ -34,7 +34,7 @@ install_3proxy() {
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cp ./scripts/rc.d/3proxy.sh /etc/init.d/3proxy
     cp ./scripts/3proxy.service /etc/systemd/system/3proxy.service
-    systemctl daemon-reload
+    
     cd $WORKDIR
 }
 
@@ -130,7 +130,7 @@ EOF
 chmod +x /etc/rc.d/rc.local
 bash /etc/rc.d/rc.local
 
-
+systemctl daemon-reload
 systemctl enable rc-local
 systemctl start rc-local
 gen_proxy_file_for_user
