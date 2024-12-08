@@ -16,13 +16,7 @@ clear_proxy_and_file(){
 	else
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
-	
-	if rm -f /home/proxy-installer/data.txt /home/proxy-installer/proxy.txt; then
-	    echo "Đã xóa tệp data.txt và proxy.txt thành công."
-	else
-	    echo "Lỗi khi xóa tệp, tiếp tục chạy lệnh tiếp theo."
-	fi
-
+	rm -rf /home/proxy-installer
 }
 
 random() {
