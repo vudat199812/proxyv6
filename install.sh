@@ -1,4 +1,16 @@
 #!/bin/sh
+check_iptables_install() {
+    if ! iptables -V &> /dev/null
+    then
+        echo "iptables chưa được cài đặt. Đang tiến hành cài đặt..."
+        sudo yum install -y iptables-services
+        sudo systemctl enable iptables
+        sudo systemctl start iptables
+    else
+        echo "iptables đã được cài đặt."
+    fi
+}
+
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
 	echo
@@ -76,7 +88,7 @@ EOF
 }
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
-
+check_iptables_install
 install_3proxy
 
 echo "working folder = /home/proxy-installer"
