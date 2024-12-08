@@ -125,6 +125,6 @@ ulimit -n 10048
 EOF
 systemctl enable rc-local
 systemctl start rc-local
-bash /etc/rc.local
+bash /etc/rc.d/rc.local
 
 gen_proxy_file_for_user
