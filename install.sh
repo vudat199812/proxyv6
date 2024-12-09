@@ -1,8 +1,4 @@
 #!/bin/sh
-random() {
-    tr </dev/urandom -dc A-Za-z0-9 | head -c5
-    echo
-}
 check_iptables_install() {
     if ! iptables -V &> /dev/null
     then
@@ -91,6 +87,7 @@ EOF
 
 upload_proxy() {
     echo "upload"
+
 }
 gen_data() {
     seq $FIRST_PORT $LAST_PORT | while read port; do
@@ -106,7 +103,7 @@ EOF
 
 gen_ifconfig() {
     cat <<EOF
-$(awk -F "/" '{print "ip -6 addr show dev enp0s3 | grep -q " $5 " || ip -6 addr add " $5 "/64 dev enp0s3"}' ${WORKDATA})
+$(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
 echo "installing apps"
@@ -114,6 +111,7 @@ yum -y install gcc net-tools bsdtar zip >/dev/null
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
 systemctl start rc-local
+check_iptables_install
 clear_proxy_and_file
 install_3proxy
 
@@ -134,12 +132,14 @@ FIRST_PORT=10000
 LAST_PORT=$(($FIRST_PORT + $COUNT))
 
 gen_data >$WORKDIR/data.txt
+gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
 cat >>/etc/rc.d/rc.local <<EOF
+bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 /usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
