@@ -10,7 +10,14 @@ install_dependencies() {
     yum -y install gcc net-tools bsdtar zip >/dev/null
     yum groupinstall -y "Development Tools" >/dev/null
 }
-
+check_iptables() {
+    if ! command -v iptables &>/dev/null; then
+        echo "Lệnh iptables không được tìm thấy. Đang cài đặt..."
+        sudo yum install -y iptables-services
+        sudo systemctl start iptables
+        sudo systemctl enable iptables
+    fi
+}
 random() {
     tr </dev/urandom -dc A-Za-z0-9 | head -c5
     echo
@@ -97,6 +104,7 @@ update_ifconfig() {
 main() {
     echo "Cài đặt proxy IPv6 với 3proxy"
     mkdir -p $WORKDIR && cd $WORKDIR
+    check_iptables
     install_dependencies
     install_3proxy
 
