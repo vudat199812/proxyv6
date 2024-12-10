@@ -13,16 +13,15 @@ check_iptables_install() {
 }
 
 clear_proxy_and_file() {
-    # Xóa địa chỉ IPv6 không mong muốn
-    ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | while read addr; do
-        echo "Đang xóa địa chỉ IPv6: $addr"
-        sudo ip -6 addr del $addr dev eth0
-        if [ $? -eq 0 ]; then
-            echo "Đã xóa địa chỉ IPv6: $addr thành công."
-        else
-            echo "Lỗi khi xóa địa chỉ IPv6: $addr."
-        fi
-    done
+    # Xóa tất cả các địa chỉ IPv6 trên giao diện eth0
+    echo "Đang xóa tất cả các địa chỉ IPv6 trên eth0..."
+    sudo ip -6 addr flush dev eth0
+    
+    if [ $? -eq 0 ]; then
+        echo "Đã xóa tất cả các địa chỉ IPv6 thành công."
+    else
+        echo "Lỗi khi xóa các địa chỉ IPv6."
+    fi
 
     # Khởi động lại dịch vụ mạng sau khi xóa
     systemctl restart NetworkManager
@@ -45,6 +44,7 @@ clear_proxy_and_file() {
     echo "Chờ 3 giây để đảm bảo các thao tác hoàn tất..."
     sleep 3
 }
+
 
 random() {
     tr </dev/urandom -dc A-Za-z0-9 | head -c5
