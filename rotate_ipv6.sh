@@ -1,23 +1,51 @@
-#!/bin/bash
+#!/bin/sh
 
-WORKDIR="/home/proxy-installer"
-WORKDATA="${WORKDIR}/data.txt"
-IP4=$(curl -4 -s icanhazip.com)
-IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
-
-install_dependencies() {
-    echo "Đang kiểm tra và cài đặt các gói cần thiết..."
-    yum -y install gcc net-tools bsdtar zip >/dev/null
-    yum groupinstall -y "Development Tools" >/dev/null
-}
-check_iptables() {
-    if ! command -v iptables &>/dev/null; then
-        echo "Lệnh iptables không được tìm thấy. Đang cài đặt..."
+check_iptables_install() {
+    if ! iptables -V &> /dev/null
+    then
+        echo "iptables chưa được cài đặt. Đang tiến hành cài đặt..."
         sudo yum install -y iptables-services
-        sudo systemctl start iptables
         sudo systemctl enable iptables
+        sudo systemctl start iptables
+    else
+        echo "iptables đã được cài đặt."
     fi
 }
+
+clear_proxy_and_file() {
+    # Xóa địa chỉ IPv6 không mong muốn
+    ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | while read addr; do
+        echo "Đang xóa địa chỉ IPv6: $addr"
+        sudo ip -6 addr del $addr dev eth0
+        if [ $? -eq 0 ]; then
+            echo "Đã xóa địa chỉ IPv6: $addr thành công."
+        else
+            echo "Lỗi khi xóa địa chỉ IPv6: $addr."
+        fi
+    done
+
+    # Khởi động lại dịch vụ mạng sau khi xóa
+    systemctl restart NetworkManager
+
+    # Xóa thư mục và tệp không cần thiết
+    if [ -d "/home/proxy-installer" ]; then
+        echo "Đang xóa thư mục /home/proxy-installer..."
+        sudo rm -rf /home/proxy-installer
+    else
+        echo "/home/proxy-installer không tồn tại."
+    fi
+
+    if [ -f "/usr/local/etc/3proxy/bin/3proxy" ]; then
+        echo "Đang xóa tệp /usr/local/etc/3proxy/bin/3proxy..."
+        sudo rm -rf /usr/local/etc/3proxy/bin/3proxy
+    else
+        echo "/usr/local/etc/3proxy/bin/3proxy không tồn tại."
+    fi
+
+    echo "Chờ 3 giây để đảm bảo các thao tác hoàn tất..."
+    sleep 3
+}
+
 random() {
     tr </dev/urandom -dc A-Za-z0-9 | head -c5
     echo
@@ -32,22 +60,17 @@ gen64() {
 }
 
 install_3proxy() {
-    if ! command -v 3proxy &>/dev/null; then
-        echo "Đang cài đặt 3proxy..."
-        URL="https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz"
-        wget -qO- $URL | bsdtar -xvf- >/dev/null
-        cd 3proxy-0.9.4
-        make -f Makefile.Linux
-        mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
-        cp bin/3proxy /usr/local/etc/3proxy/bin/
-        cd $WORKDIR
-        echo "Cài đặt 3proxy hoàn tất."
-    else
-        echo "3proxy đã được cài đặt."
-    fi
+    echo "Installing 3proxy..."
+    URL="https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz"
+    wget -qO- $URL | bsdtar -xvf-
+    cd 3proxy-0.9.4
+    make -f Makefile.Linux
+    mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
+    cp bin/3proxy /usr/local/etc/3proxy/bin/
+    cd $WORKDIR
 }
 
-gen_3proxy_config() {
+gen_3proxy() {
     cat <<EOF
 daemon
 maxconn 1000
@@ -65,56 +88,72 @@ $(awk -F "/" '{print "auth strong\n" \
 EOF
 }
 
-rotate_proxy_info() {
-    echo "Đang làm mới thông tin proxy..."
-    rm -f $WORKDIR/proxy.txt $WORKDATA
-    seq $FIRST_PORT $LAST_PORT | while read port; do
-        USER="usr$(random)"
-        PASS="pass$(random)"
-        IPV6=$(gen64 $IP6)
-        echo "$USER/$PASS/$IP4/$port/$IPV6" >> $WORKDATA
-    done
-    gen_3proxy_config > /usr/local/etc/3proxy/3proxy.cfg
-    gen_proxy_file_for_user
-    update_iptables
-    update_ifconfig
-    systemctl restart 3proxy
-    echo "Thông tin proxy đã được cập nhật và lưu tại $WORKDIR/proxy.txt."
-}
-
 gen_proxy_file_for_user() {
-    awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2}' ${WORKDATA} >$WORKDIR/proxy.txt
+    cat >proxy.txt <<EOF
+$(awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2 }' ${WORKDATA})
+EOF
 }
 
-update_iptables() {
-    echo "Cập nhật lại các quy tắc iptables..."
-    iptables -F
-    awk -F "/" '{print "iptables -A INPUT -p tcp --dport " $4 " -j ACCEPT"}' ${WORKDATA} | bash
-    iptables-save > /etc/sysconfig/iptables
-    echo "Quy tắc iptables đã được cập nhật."
+upload_proxy() {
+    echo "Uploading proxy..."
 }
 
-update_ifconfig() {
-    echo "Cập nhật địa chỉ IPv6..."
-    ip -6 addr flush dev eth0
-    awk -F "/" '{print "ip -6 addr add " $5 "/64 dev eth0"}' ${WORKDATA} | bash
-    echo "Địa chỉ IPv6 đã được cập nhật."
+gen_data() {
+    seq $FIRST_PORT $LAST_PORT | while read port; do
+        echo "usr$(random)/pass$(random)/$IP4/$port/$(gen64 $IP6)"
+    done
 }
 
-main() {
-    echo "Cài đặt proxy IPv6 với 3proxy"
-    mkdir -p $WORKDIR && cd $WORKDIR
-    check_iptables
-    install_dependencies
-    install_3proxy
-
-    echo "Nhập số lượng proxy bạn muốn tạo (ví dụ: 100):"
-    read COUNT
-    FIRST_PORT=10000
-    LAST_PORT=$(($FIRST_PORT + $COUNT - 1))
-
-    rotate_proxy_info
-    echo "Hoàn tất! Proxy đã sẵn sàng và thông tin được lưu tại $WORKDIR/proxy.txt."
+gen_iptables() {
+    cat <<EOF
+    $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
+EOF
 }
 
-main
+gen_ifconfig() {
+    cat <<EOF
+$(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
+EOF
+}
+
+echo "Installing required apps..."
+yum -y install gcc net-tools bsdtar zip >/dev/null
+chmod +x /etc/rc.d/rc.local
+systemctl enable rc-local
+systemctl start rc-local
+check_iptables_install
+clear_proxy_and_file
+install_3proxy
+
+echo "Working folder = /home/proxy-installer"
+WORKDIR="/home/proxy-installer"
+WORKDATA="${WORKDIR}/data.txt"
+mkdir $WORKDIR && cd $_
+
+IP4=$(curl -4 -s icanhazip.com)
+IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
+
+echo "Internal IP = ${IP4}. External subnet for IP6 = ${IP6}"
+
+echo "How many proxies do you want to create? Example: 500"
+read COUNT
+
+FIRST_PORT=10000
+LAST_PORT=$(($FIRST_PORT + $COUNT))
+
+gen_data >$WORKDIR/data.txt
+gen_iptables >$WORKDIR/boot_iptables.sh
+gen_ifconfig >$WORKDIR/boot_ifconfig.sh
+chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
+
+gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
+
+cat >>/etc/rc.d/rc.local <<EOF
+bash ${WORKDIR}/boot_iptables.sh
+bash ${WORKDIR}/boot_ifconfig.sh
+ulimit -n 10048
+/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
+EOF
+
+bash /etc/rc.d/rc.local
+gen_proxy_file_for_user
