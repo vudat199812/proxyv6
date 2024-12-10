@@ -157,3 +157,4 @@ EOF
 
 bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
+
