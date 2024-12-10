@@ -40,7 +40,7 @@ install_3proxy() {
     echo "Cài đặt 3proxy..."
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     wget -qO- https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz | tar -xz
-    cd 3proxy-3proxy-0.9.4
+    cd 3proxy-0.9.4
     make -f Makefile.Linux
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     echo "Hoàn tất cài đặt 3proxy."
