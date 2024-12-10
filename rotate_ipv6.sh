@@ -13,13 +13,39 @@ check_iptables_install() {
 }
 
 clear_proxy_and_file() {
-    # Xóa tất cả địa chỉ IPv6 trên eth0
-    echo "Đang xóa tất cả địa chỉ IPv6 trên eth0..."
+    # Xóa tất cả các địa chỉ IPv6 trên giao diện eth0
+    echo "Đang xóa tất cả các địa chỉ IPv6 trên eth0..."
+    sudo ip link set dev eth0 down
     sudo ip -6 addr flush dev eth0
-    systemctl restart NetworkManager
-    rm -rf /home/proxy-installer
-    rm -rf /usr/local/etc/3proxy/bin/3proxy
-    echo "Hoàn tất xóa IPv6 và tệp cũ."
+    sudo ip link set dev eth0 up
+
+    if [ $? -eq 0 ]; then
+        echo "Đã xóa tất cả các địa chỉ IPv6 thành công."
+    else
+        echo "Lỗi khi xóa các địa chỉ IPv6."
+    fi
+
+    # Khởi động lại dịch vụ mạng
+    echo "Khởi động lại dịch vụ mạng..."
+    sudo systemctl restart NetworkManager
+
+    # Xóa thư mục và tệp không cần thiết
+    if [ -d "/home/proxy-installer" ]; then
+        echo "Đang xóa thư mục /home/proxy-installer..."
+        sudo rm -rf /home/proxy-installer
+    else
+        echo "/home/proxy-installer không tồn tại."
+    fi
+
+    if [ -f "/usr/local/etc/3proxy/bin/3proxy" ]; then
+        echo "Đang xóa tệp /usr/local/etc/3proxy/bin/3proxy..."
+        sudo rm -rf /usr/local/etc/3proxy/bin/3proxy
+    else
+        echo "/usr/local/etc/3proxy/bin/3proxy không tồn tại."
+    fi
+
+    echo "Chờ 3 giây để đảm bảo các thao tác hoàn tất..."
+    sleep 3
 }
 
 random() {
@@ -28,7 +54,6 @@ random() {
 }
 
 array=(1 2 3 4 5 6 7 8 9 0 a b c d e f)
-
 gen64() {
     ip64() {
         echo "${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}"
@@ -72,7 +97,7 @@ EOF
 }
 
 upload_proxy() {
-    echo "Uploading proxy file..."
+    echo "Uploading proxy..."
 }
 
 gen_data() {
@@ -83,7 +108,15 @@ gen_data() {
 
 gen_iptables() {
     cat <<EOF
-    $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
+#!/bin/bash
+for port in {${FIRST_PORT}..${LAST_PORT}}; do
+    if ! sudo iptables -C INPUT -p tcp --dport \$port -m state --state NEW -j ACCEPT 2>/dev/null; then
+        sudo iptables -I INPUT -p tcp --dport \$port -m state --state NEW -j ACCEPT
+        echo "Đã thêm cổng \$port vào iptables."
+    else
+        echo "Cổng \$port đã tồn tại trong iptables, bỏ qua."
+    fi
+done
 EOF
 }
 
@@ -93,7 +126,7 @@ $(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
 
-echo "Installing necessary applications..."
+echo "Installing required apps..."
 yum -y install gcc net-tools bsdtar zip >/dev/null
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
@@ -102,7 +135,7 @@ check_iptables_install
 clear_proxy_and_file
 install_3proxy
 
-echo "Setting up working directory..."
+echo "Working folder = /home/proxy-installer"
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
 mkdir $WORKDIR && cd $_
@@ -110,9 +143,9 @@ mkdir $WORKDIR && cd $_
 IP4=$(curl -4 -s icanhazip.com)
 IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
 
-echo "Internal IP: ${IP4}, External IPv6 subnet: ${IP6}"
+echo "Internal IP = ${IP4}. External subnet for IP6 = ${IP6}"
 
-echo "Enter the number of proxies to create (e.g., 500):"
+echo "How many proxies do you want to create? Example: 500"
 read COUNT
 
 FIRST_PORT=10000
@@ -134,5 +167,3 @@ EOF
 
 bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
-
-echo "Proxy setup completed."
