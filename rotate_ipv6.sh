@@ -13,38 +13,14 @@ check_iptables_install() {
 }
 
 clear_proxy_and_file() {
-    # Xóa tất cả các địa chỉ IPv6 trên giao diện eth0
-    echo "Đang xóa tất cả các địa chỉ IPv6 trên eth0..."
+    # Xóa tất cả địa chỉ IPv6 trên eth0
+    echo "Đang xóa tất cả địa chỉ IPv6 trên eth0..."
     sudo ip -6 addr flush dev eth0
-    
-    if [ $? -eq 0 ]; then
-        echo "Đã xóa tất cả các địa chỉ IPv6 thành công."
-    else
-        echo "Lỗi khi xóa các địa chỉ IPv6."
-    fi
-
-    # Khởi động lại dịch vụ mạng sau khi xóa
     systemctl restart NetworkManager
-
-    # Xóa thư mục và tệp không cần thiết
-    if [ -d "/home/proxy-installer" ]; then
-        echo "Đang xóa thư mục /home/proxy-installer..."
-        sudo rm -rf /home/proxy-installer
-    else
-        echo "/home/proxy-installer không tồn tại."
-    fi
-
-    if [ -f "/usr/local/etc/3proxy/bin/3proxy" ]; then
-        echo "Đang xóa tệp /usr/local/etc/3proxy/bin/3proxy..."
-        sudo rm -rf /usr/local/etc/3proxy/bin/3proxy
-    else
-        echo "/usr/local/etc/3proxy/bin/3proxy không tồn tại."
-    fi
-
-    echo "Chờ 3 giây để đảm bảo các thao tác hoàn tất..."
-    sleep 3
+    rm -rf /home/proxy-installer
+    rm -rf /usr/local/etc/3proxy/bin/3proxy
+    echo "Hoàn tất xóa IPv6 và tệp cũ."
 }
-
 
 random() {
     tr </dev/urandom -dc A-Za-z0-9 | head -c5
@@ -52,6 +28,7 @@ random() {
 }
 
 array=(1 2 3 4 5 6 7 8 9 0 a b c d e f)
+
 gen64() {
     ip64() {
         echo "${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}"
@@ -95,7 +72,7 @@ EOF
 }
 
 upload_proxy() {
-    echo "Uploading proxy..."
+    echo "Uploading proxy file..."
 }
 
 gen_data() {
@@ -116,7 +93,7 @@ $(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
 
-echo "Installing required apps..."
+echo "Installing necessary applications..."
 yum -y install gcc net-tools bsdtar zip >/dev/null
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
@@ -125,7 +102,7 @@ check_iptables_install
 clear_proxy_and_file
 install_3proxy
 
-echo "Working folder = /home/proxy-installer"
+echo "Setting up working directory..."
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
 mkdir $WORKDIR && cd $_
@@ -133,9 +110,9 @@ mkdir $WORKDIR && cd $_
 IP4=$(curl -4 -s icanhazip.com)
 IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
 
-echo "Internal IP = ${IP4}. External subnet for IP6 = ${IP6}"
+echo "Internal IP: ${IP4}, External IPv6 subnet: ${IP6}"
 
-echo "How many proxies do you want to create? Example: 500"
+echo "Enter the number of proxies to create (e.g., 500):"
 read COUNT
 
 FIRST_PORT=10000
@@ -158,3 +135,4 @@ EOF
 bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
 
+echo "Proxy setup completed."
