@@ -31,6 +31,7 @@ install_3proxy() {
     else
         echo "3proxy đã được cài đặt."
     fi
+    
 }
 
 gen_3proxy() {
