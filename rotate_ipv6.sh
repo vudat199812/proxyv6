@@ -4,7 +4,9 @@ WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
 IP4=$(curl -4 -s icanhazip.com)
 IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
-
+install_plugin(){
+    yum -y install gcc net-tools bsdtar zip >/dev/null
+}
 random() {
     tr </dev/urandom -dc A-Za-z0-9 | head -c5
     echo
@@ -91,6 +93,7 @@ update_ifconfig() {
 main() {
     echo "Cài đặt proxy IPv6 với 3proxy"
     mkdir -p $WORKDIR && cd $WORKDIR
+    install_plugin
     install_3proxy
 
     echo "Nhập số lượng proxy bạn muốn tạo (ví dụ: 100):"
