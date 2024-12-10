@@ -4,9 +4,13 @@ WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
 IP4=$(curl -4 -s icanhazip.com)
 IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
-install_plugin(){
+
+install_dependencies() {
+    echo "Đang kiểm tra và cài đặt các gói cần thiết..."
     yum -y install gcc net-tools bsdtar zip >/dev/null
+    yum groupinstall -y "Development Tools" >/dev/null
 }
+
 random() {
     tr </dev/urandom -dc A-Za-z0-9 | head -c5
     echo
@@ -22,21 +26,21 @@ gen64() {
 
 install_3proxy() {
     if ! command -v 3proxy &>/dev/null; then
-        echo "Cài đặt 3proxy..."
+        echo "Đang cài đặt 3proxy..."
         URL="https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz"
-        wget -qO- $URL | bsdtar -xvf-
+        wget -qO- $URL | bsdtar -xvf- >/dev/null
         cd 3proxy-0.9.4
         make -f Makefile.Linux
         mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
         cp bin/3proxy /usr/local/etc/3proxy/bin/
         cd $WORKDIR
+        echo "Cài đặt 3proxy hoàn tất."
     else
         echo "3proxy đã được cài đặt."
     fi
-    
 }
 
-gen_3proxy() {
+gen_3proxy_config() {
     cat <<EOF
 daemon
 maxconn 1000
@@ -55,7 +59,7 @@ EOF
 }
 
 rotate_proxy_info() {
-    echo "Đang thay đổi thông tin proxy..."
+    echo "Đang làm mới thông tin proxy..."
     rm -f $WORKDIR/proxy.txt $WORKDATA
     seq $FIRST_PORT $LAST_PORT | while read port; do
         USER="usr$(random)"
@@ -63,12 +67,12 @@ rotate_proxy_info() {
         IPV6=$(gen64 $IP6)
         echo "$USER/$PASS/$IP4/$port/$IPV6" >> $WORKDATA
     done
-    gen_3proxy > /usr/local/etc/3proxy/3proxy.cfg
+    gen_3proxy_config > /usr/local/etc/3proxy/3proxy.cfg
     gen_proxy_file_for_user
     update_iptables
     update_ifconfig
     systemctl restart 3proxy
-    echo "Thông tin proxy mới đã được cập nhật và lưu tại $WORKDIR/proxy.txt."
+    echo "Thông tin proxy đã được cập nhật và lưu tại $WORKDIR/proxy.txt."
 }
 
 gen_proxy_file_for_user() {
@@ -93,7 +97,7 @@ update_ifconfig() {
 main() {
     echo "Cài đặt proxy IPv6 với 3proxy"
     mkdir -p $WORKDIR && cd $WORKDIR
-    install_plugin
+    install_dependencies
     install_3proxy
 
     echo "Nhập số lượng proxy bạn muốn tạo (ví dụ: 100):"
