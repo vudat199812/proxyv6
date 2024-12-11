@@ -15,7 +15,6 @@ install_3proxy() {
     cd 3proxy-0.9.4
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
-    cp scripts/3proxy /usr/local/etc/3proxy/bin/
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cd $WORKDIR
     echo "installing 3proxy"
