@@ -13,8 +13,8 @@ clear_proxy_and_file(){
     cp 3proxy-0.9.4/bin/3proxy /usr/local/etc/3proxy/bin/
     > /usr/local/etc/3proxy/3proxy.cfg
     iptables -F
+    iptables -X
     > $WORKDIR/data.txt
-    > $WORKDIR/boot_ifconfig.sh
     
 }
 
