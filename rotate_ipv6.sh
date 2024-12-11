@@ -1,4 +1,6 @@
 #!/bin/sh
+WORKDIR="/home/proxy-installer"
+WORKDATA="${WORKDIR}/data.txt"
 clear_proxy_and_file(){
 	if ip -6 addr flush dev eth0; then
 	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
