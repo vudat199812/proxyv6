@@ -85,9 +85,6 @@ EOF
 }
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
-chmod +x /etc/rc.d/rc.local
-systemctl enable rc-local
-systemctl start rc-local
 check_iptables_install
 install_3proxy
 
@@ -113,15 +110,12 @@ gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
-
-cat >>/etc/rc.d/rc.local <<EOF
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-ulimit -n 10048
-systemctl start 3proxy
-EOF
+cat >>/etc/rc.d/rc.local <<EOF
 
-bash /etc/rc.d/rc.local
+ulimit -n 10048
+
 gen_proxy_file_for_user
 
 upload_proxy
