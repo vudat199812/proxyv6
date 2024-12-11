@@ -10,7 +10,7 @@ clear_proxy_and_file(){
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
     rm -f /usr/local/etc/3proxy/bin/3proxy
-    cp 3proxy-0.9.4/bin/3proxy /usr/local/etc/3proxy/bin/
+    
     > /usr/local/etc/3proxy/3proxy.cfg
     iptables -F
     iptables -X
@@ -74,9 +74,15 @@ EOF
 }
 
 gen_ifconfig() {
-    cat <<EOF
-$(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
-EOF
+    awk -F "/" '{print $5}' ${WORKDATA} | while read ip; do
+        if ip -6 addr show dev eth0 | grep -q "${ip}/64"; then
+            echo "Địa chỉ ${ip} đã tồn tại trên eth0, bỏ qua."
+        else
+            echo "Thêm địa chỉ ${ip} vào giao diện eth0."
+            echo "ifconfig eth0 inet6 add ${ip}/64"
+            ifconfig eth0 inet6 add ${ip}/64
+        fi
+    done
 }
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
