@@ -12,6 +12,7 @@ clear_proxy_and_file(){
     > $WORKDIR/boot_iptables.sh
     > $WORKDIR/data.txt
     > $WORKDIR/boot_ifconfig.sh
+    
 }
 
 random() {
