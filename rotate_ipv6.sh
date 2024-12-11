@@ -85,12 +85,14 @@ read COUNT
 
 FIRST_PORT=10000
 LAST_PORT=$(($FIRST_PORT + $COUNT))
-
+echo "gen_data"
 gen_data >$WORKDIR/data.txt
+echo "gen_iptables"
 gen_iptables >$WORKDIR/boot_iptables.sh
+echo "gen_ifconfig"
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
-
+echo "gen_3proxy"
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
 cat >>/etc/rc.d/rc.local <<EOF
@@ -101,4 +103,5 @@ ulimit -n 10048
 EOF
 
 bash /etc/rc.d/rc.local
+echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
