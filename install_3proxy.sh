@@ -17,7 +17,7 @@ install_3proxy() {
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cd $WORKDIR
-    echo "installing 3proxy"
+    echo "install done"
 }
 rm -rf /usr/local/etc/3proxy/bin/3proxy
 yum -y install gcc net-tools bsdtar zip >/dev/null
