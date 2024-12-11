@@ -77,12 +77,6 @@ systemctl enable rc-local
 systemctl start rc-local
 clear_proxy_and_file
 
-
-echo "working folder = /home/proxy-installer"
-WORKDIR="/home/proxy-installer"
-WORKDATA="${WORKDIR}/data.txt"
-mkdir $WORKDIR && cd $_
-
 IP4=$(curl -4 -s icanhazip.com)
 IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
 
