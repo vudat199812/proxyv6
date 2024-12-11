@@ -11,7 +11,7 @@ clear_proxy_and_file(){
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
     rm -f /usr/local/etc/3proxy/bin/3proxy
-    cp bin/3proxy /usr/local/etc/3proxy/bin/
+    cp 3proxy-0.9.4/bin/3proxy /usr/local/etc/3proxy/bin/
     > /usr/local/etc/3proxy/3proxy.cfg
     > $WORKDIR/boot_iptables.sh
     > $WORKDIR/data.txt
