@@ -1,3 +1,13 @@
+check_iptables_install() {
+    if ! iptables -V &> /dev/null; then
+        echo "iptables chưa được cài đặt. Đang tiến hành cài đặt..."
+        sudo yum install -y iptables-services
+        sudo systemctl enable iptables
+        sudo systemctl start iptables
+    else
+        echo "iptables đã được cài đặt."
+    fi
+}
 install_3proxy() {
     echo "installing 3proxy"
     URL="https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz"
@@ -7,5 +17,11 @@ install_3proxy() {
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cd $WORKDIR
+    echo "installing 3proxy"
 }
+yum -y install gcc net-tools bsdtar zip >/dev/null
+chmod +x /etc/rc.d/rc.local
+systemctl enable rc-local
+systemctl start rc-local
+check_iptables_install
 install_3proxy
