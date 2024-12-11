@@ -74,15 +74,9 @@ EOF
 }
 
 gen_ifconfig() {
-    awk -F "/" '{print $5}' ${WORKDATA} | while read ip; do
-        if ip -6 addr show dev eth0 | grep -q "${ip}/64"; then
-            echo "Địa chỉ ${ip} đã tồn tại trên eth0, bỏ qua."
-        else
-            echo "Thêm địa chỉ ${ip} vào giao diện eth0."
-            echo "ifconfig eth0 inet6 add ${ip}/64"
-            ifconfig eth0 inet6 add ${ip}/64
-        fi
-    done
+    cat <<EOF
+$(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
+EOF
 }
 chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
