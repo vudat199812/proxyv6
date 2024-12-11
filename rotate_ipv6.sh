@@ -5,7 +5,6 @@ clear_proxy_and_file(){
 	else
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
-    ip -6 addr flush dev eth0
     systemctl restart NetworkManager
     rm -f /usr/local/etc/3proxy/3proxy.cfg $WORKDIR/boot_iptables.sh $WORKDIR/boot_ifconfig.sh $WORKDIR/data.txt
     
