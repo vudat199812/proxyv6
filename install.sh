@@ -10,17 +10,6 @@ check_iptables_install() {
         echo "iptables đã được cài đặt."
     fi
 }
-clear_proxy_and_file(){
-	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
-	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
-	else
-	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
-	fi
-	systemctl restart NetworkManager
-	rm -rf /home/proxy-installer
- 	rm -rf /usr/local/etc/3proxy/bin/3proxy
-  
-}
 
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
@@ -97,7 +86,6 @@ chmod +x /etc/rc.d/rc.local
 systemctl enable rc-local
 systemctl start rc-local
 check_iptables_install
-clear_proxy_and_file
 install_3proxy
 
 echo "working folder = /home/proxy-installer"
