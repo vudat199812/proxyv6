@@ -19,6 +19,7 @@ install_3proxy() {
     cd $WORKDIR
     echo "install done"
 }
+
 rm -rf /usr/local/etc/3proxy/bin/3proxy
 yum -y install gcc net-tools bsdtar zip >/dev/null
 check_iptables_install
