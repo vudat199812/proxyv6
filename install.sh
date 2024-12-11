@@ -32,7 +32,7 @@ install_3proxy() {
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
-    
+    cp ./scripts/3proxy.service /etc/systemd/system/
     cd $WORKDIR
 }
 
@@ -122,5 +122,5 @@ EOF
 
 bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
-cp bin/3proxy.service /etc/systemd/system/
+
 upload_proxy
