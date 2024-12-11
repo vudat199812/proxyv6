@@ -2,8 +2,8 @@
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
 clear_proxy_and_file(){
-	echo"clear_proxy_and_file"
-	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
+	echo "clear_proxy_and_file"
+	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
 	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
 	else
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
