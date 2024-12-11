@@ -9,7 +9,7 @@ clear_proxy_and_file(){
 	fi
     > /usr/local/etc/3proxy/3proxy.cfg
     > $WORKDIR/boot_iptables.sh
-    >  $WORKDIR/data.txt
+    > $WORKDIR/data.txt
 
 }
 
