@@ -30,8 +30,7 @@ install_3proxy() {
     wget -qO- $URL | bsdtar -xvf-
     cd 3proxy-0.9.4
     make -f Makefile.Linux
-    cd 3proxy-0.9.4
-    cp scripts/3proxy.service /etc/systemd/system/3proxy.service
+    cp ./scripts/3proxy.service /etc/systemd/system/3proxy.service
     systemctl daemon-reload
     cd $WORKDIR
 }
