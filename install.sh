@@ -4,18 +4,28 @@ check_iptables_install() {
     then
         echo "iptables chưa được cài đặt. Đang tiến hành cài đặt..."
         sudo yum install -y iptables-services
-        systemctl enable iptables
-        systemctl start iptables
+        sudo systemctl enable iptables
+        sudo systemctl start iptables
     else
         echo "iptables đã được cài đặt."
     fi
+}
+clear_proxy_and_file(){
+	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | grep -v "fe80::" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
+	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
+	else
+	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
+	fi
+	systemctl restart NetworkManager
+	rm -rf /home/proxy-installer
+ 	rm -rf /usr/local/etc/3proxy/bin/3proxy
+  
 }
 
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
 	echo
 }
-
 
 array=(1 2 3 4 5 6 7 8 9 0 a b c d e f)
 gen64() {
@@ -32,8 +42,6 @@ install_3proxy() {
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp bin/3proxy /usr/local/etc/3proxy/bin/
-    cp ./scripts/3proxy.service /etc/systemd/system/3proxy.service
-    systemctl daemon-reload
     cd $WORKDIR
 }
 
@@ -85,7 +93,11 @@ EOF
 }
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
+chmod +x /etc/rc.d/rc.local
+systemctl enable rc-local
+systemctl start rc-local
 check_iptables_install
+clear_proxy_and_file
 install_3proxy
 
 echo "working folder = /home/proxy-installer"
@@ -108,11 +120,15 @@ gen_data >$WORKDIR/data.txt
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
+
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
+
+cat >>/etc/rc.d/rc.local <<EOF
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-systemctl start 3proxy
+ulimit -n 10048
+/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
+EOF
 
+bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
-
-upload_proxy
