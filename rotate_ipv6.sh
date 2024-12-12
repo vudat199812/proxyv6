@@ -14,6 +14,7 @@ clear_proxy_and_file(){
     > /usr/local/etc/3proxy/3proxy.cfg
     iptables -F
     iptables -X
+    service iptables save
     > $WORKDIR/data.txt
     systemctl restart NetworkManager
     
