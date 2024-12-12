@@ -112,9 +112,6 @@ chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-cat >>/etc/rc.d/rc.local <<EOF
-
-ulimit -n 10048
 
 gen_proxy_file_for_user
 
