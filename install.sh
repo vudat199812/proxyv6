@@ -4,8 +4,8 @@ check_iptables_install() {
     then
         echo "iptables chưa được cài đặt. Đang tiến hành cài đặt..."
         sudo yum install -y iptables-services
-        sudo systemctl enable iptables
-        sudo systemctl start iptables
+        systemctl enable iptables
+        systemctl start iptables
     else
         echo "iptables đã được cài đặt."
     fi
