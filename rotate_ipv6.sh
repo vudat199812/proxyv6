@@ -9,7 +9,7 @@ clear_proxy_and_file(){
 	else
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
-    rm -f /usr/local/etc/3proxy/bin/3proxy
+    
     
     > /usr/local/etc/3proxy/3proxy.cfg
     iptables -F
