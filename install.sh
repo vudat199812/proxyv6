@@ -31,7 +31,7 @@ install_3proxy() {
     cd 3proxy-0.9.4
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
-    cp bin/3proxy /usr/local/etc/3proxy/bin/
+    cp bin/3proxy /usr/local/etc/3proxy/bin/3proxy
     cp ./scripts/3proxy.service /etc/systemd/system/3proxy.service
     systemctl daemon-reload
     cd $WORKDIR
