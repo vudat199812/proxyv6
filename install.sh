@@ -34,6 +34,7 @@ install_3proxy() {
     cp bin/3proxy /usr/local/etc/3proxy/bin/
     cp scripts/3proxy.service /etc/systemd/system/3proxy.service
     sed -i 's/RestartSec=60s/RestartSec=0s/' /etc/systemd/system/3proxy.service
+    sed -i 's|ExecStart=/bin/3proxy ${CONFIGFILE}|ExecStart=/etc/3proxy/bin/3proxy ${CONFIGFILE}|' /etc/systemd/system/3proxy.service
     cd $WORKDIR
 }
 
