@@ -107,4 +107,6 @@ bash ${WORKDIR}/boot_ifconfig.sh
 echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
 systemctl restart 3proxy
+
 upload_proxy
+echo "Done Rotate"
