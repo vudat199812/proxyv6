@@ -9,6 +9,7 @@ clear_proxy_and_file(){
     chmod +x ${WORKDIR}/boot_ifconfig_delete.sh $WORKDIR/boot_iptables_delete.sh
     bash $WORKDIR/boot_ifconfig_delete.sh
     bash $WORKDIR/boot_iptables_delete.sh
+    systemctl restart NetworkManager
     > ${WORKDIR}/boot_iptables.sh
     > ${WORKDIR}/boot_ifconfig.sh
 }
@@ -105,7 +106,6 @@ bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
-systemctl restart NetworkManager
 systemctl restart 3proxy
 upload_proxy
 echo "Done Rotate"
