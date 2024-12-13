@@ -128,5 +128,6 @@ bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 gen_proxy_file_for_user
+systemctl daemon-reload
 systemctl enable 3proxy
 systemctl start 3proxy
