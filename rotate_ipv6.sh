@@ -9,6 +9,7 @@ clear_proxy_and_file(){
     chmod +x ${WORKDIR}/boot_ifconfig_delete.sh $WORKDIR/boot_iptables_delete.sh
     bash $WORKDIR/boot_ifconfig_delete.sh
     bash $WORKDIR/boot_iptables_delete.sh
+    ps aux | grep '[3]proxy' | awk '{print $2}' | xargs kill -9
     systemctl restart NetworkManager
     > ${WORKDIR}/boot_iptables.sh
     > ${WORKDIR}/boot_ifconfig.sh
