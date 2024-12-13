@@ -10,14 +10,7 @@ check_iptables_install() {
         echo "iptables đã được cài đặt."
     fi
 }
-clear_proxy_and_file(){
-	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
-	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
-	else
-	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
-	fi
-	systemctl restart NetworkManager
-}
+
 
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
@@ -102,7 +95,6 @@ EOF
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
 check_iptables_install
-clear_proxy_and_file
 install_3proxy
 
 echo "working folder = /home/proxy-installer"
