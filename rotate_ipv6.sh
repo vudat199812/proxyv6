@@ -2,22 +2,11 @@
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
 clear_proxy_and_file(){
-	echo "clear_proxy_and_file"
-	if ip -6 addr show dev eth0 | grep "inet6" | grep -v "::1/64" | awk '{print $2}' | xargs -I {} sudo ip -6 addr del {} dev eth0; then
-	    
-	    echo "Đã xóa các địa chỉ IPv6 không mong muốn thành công."
-	else
-	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
-	fi
-    
-    
+	
     > /usr/local/etc/3proxy/3proxy.cfg
-    iptables -F
-    iptables -X
-    service iptables save
     > $WORKDIR/data.txt
-    systemctl restart NetworkManager
-    
+    bash $WORKDIR/boot_ifconfig_delete.sh
+	bash $WORKDIR/boot_iptables_delete.sh
 }
 
 random() {
@@ -31,9 +20,6 @@ gen64() {
 	}
 	echo "$1:$(ip64):$(ip64):$(ip64):$(ip64)"
 }
-
-
-
 gen_3proxy() {
     cat <<EOF
 daemon
@@ -73,10 +59,20 @@ gen_iptables() {
     $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
 EOF
 }
+gen_iptables_delete() {
+    cat <<EOF
+    $(awk -F "/" '{print "iptables -D INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
+EOF
+}
 
 gen_ifconfig() {
     cat <<EOF
 $(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
+EOF
+}
+gen_ifconfig_delete() {
+    cat <<EOF
+$(awk -F "/" '{print "ifconfig eth0 inet6 del " $5 "/64"}' ${WORKDATA})
 EOF
 }
 chmod +x /etc/rc.d/rc.local
@@ -98,8 +94,10 @@ echo "gen_data"
 gen_data >$WORKDIR/data.txt
 echo "gen_iptables"
 gen_iptables >$WORKDIR/boot_iptables.sh
+gen_iptables_delete > $WORKDIR/boot_iptables_delete.sh
 echo "gen_ifconfig"
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
+gen_ifconfig_delete >$WORKDIR/boot_ifconfig_delete.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 echo "gen_3proxy"
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
@@ -107,9 +105,12 @@ gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-service iptables save
-
-
+>/etc/rc.d/rc.local
+cat >>/etc/rc.d/rc.local <<EOF
+ulimit -n 10048
+/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
+EOF
+bash /etc/rc.d/rc.local
 echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
 systemctl restart 3proxy
