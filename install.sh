@@ -17,9 +17,6 @@ clear_proxy_and_file(){
 	    echo "Lỗi khi xóa địa chỉ IPv6, tiếp tục chạy lệnh tiếp theo."
 	fi
 	systemctl restart NetworkManager
-	rm -rf /home/proxy-installer
- 	rm -rf /usr/local/etc/3proxy/bin/3proxy
-  
 }
 
 random() {
@@ -41,7 +38,7 @@ install_3proxy() {
     cd 3proxy-0.9.4
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
-    cp bin/3proxy /usr/local/etc/3proxy/bin/
+    cp bin/3proxy /usr/local/etc/3proxy/bin/3proxy
     cd $WORKDIR
 }
 
@@ -85,6 +82,12 @@ gen_iptables() {
     $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
 EOF
 }
+gen_iptables_delete() {
+    cat <<EOF
+    $(awk -F "/" '{print "iptables -D INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
+EOF
+}
+
 
 gen_ifconfig() {
     cat <<EOF
@@ -93,9 +96,6 @@ EOF
 }
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
-chmod +x /etc/rc.d/rc.local
-systemctl enable rc-local
-systemctl start rc-local
 check_iptables_install
 clear_proxy_and_file
 install_3proxy
@@ -117,15 +117,15 @@ FIRST_PORT=10000
 LAST_PORT=$(($FIRST_PORT + $COUNT))
 
 gen_data >$WORKDIR/data.txt
+gen_iptables_delete > $WORKDIR/boot_iptables_delete.sh
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
-
-cat >>/etc/rc.d/rc.local <<EOF
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
+cat >>/etc/rc.d/rc.local <<EOF
 ulimit -n 10048
 /usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
 EOF
