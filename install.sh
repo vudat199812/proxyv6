@@ -35,6 +35,7 @@ install_3proxy() {
     cp scripts/3proxy.service /etc/systemd/system/3proxy.service
     sed -i 's/RestartSec=60s/RestartSec=0s/' /etc/systemd/system/3proxy.service
     sed -i 's|ExecStart=/bin/3proxy ${CONFIGFILE}|ExecStart=/etc/3proxy/bin/3proxy ${CONFIGFILE}|' /etc/systemd/system/3proxy.service
+    chmod +x /etc/3proxy/bin/3proxy
     cd $WORKDIR
 }
 
@@ -124,6 +125,7 @@ gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
+chmod +x /usr/local/etc/3proxy/3proxy.cfg
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
