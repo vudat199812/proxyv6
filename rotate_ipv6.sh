@@ -39,7 +39,6 @@ $(awk -F "/" '{print "auth strong\n" \
 "flush\n"}' ${WORKDATA})
 EOF
 }
-
 gen_proxy_file_for_user() {
     cat >$WORKDIR/proxy.txt <<EOF
 $(awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2 }' ${WORKDATA})
