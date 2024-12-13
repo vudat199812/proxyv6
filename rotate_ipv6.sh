@@ -113,5 +113,4 @@ EOF
 bash /etc/rc.d/rc.local
 echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
-systemctl restart 3proxy
 upload_proxy
