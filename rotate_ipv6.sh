@@ -11,7 +11,6 @@ clear_proxy_and_file(){
     > ${WORKDIR}/boot_iptables.sh
     > ${WORKDIR}/boot_ifconfig.sh
 }
-
 random() {
 	tr </dev/urandom -dc A-Za-z0-9 | head -c5
 	echo
