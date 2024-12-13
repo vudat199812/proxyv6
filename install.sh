@@ -31,7 +31,9 @@ install_3proxy() {
     cd 3proxy-0.9.4
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
-    cp bin/3proxy /usr/local/etc/3proxy/bin/3proxy
+    cp bin/3proxy /usr/local/etc/3proxy/bin/
+    cp scripts/3proxy.service /etc/systemd/system/3proxy.service
+    sed -i 's/RestartSec=60s/RestartSec=0s/' /etc/systemd/system/3proxy.service
     cd $WORKDIR
 }
 
@@ -118,15 +120,12 @@ gen_iptables_delete > $WORKDIR/boot_iptables_delete.sh
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig_delete >$WORKDIR/boot_ifconfig_delete.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
-chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
+chmod +x ${WORKDIR}/boot_*.sh
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-cat >>/etc/rc.d/rc.local <<EOF
 ulimit -n 10048
-/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
-EOF
-
-bash /etc/rc.d/rc.local
 gen_proxy_file_for_user
+systemctl enable 3proxy
+systemctl start 3proxy
