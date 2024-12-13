@@ -124,6 +124,7 @@ LAST_PORT=$(($FIRST_PORT + $COUNT))
 gen_data >$WORKDIR/data.txt
 gen_iptables_delete > $WORKDIR/boot_iptables_delete.sh
 gen_iptables >$WORKDIR/boot_iptables.sh
+gen_ifconfig_delete >$WORKDIR/boot_ifconfig_delete.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 
