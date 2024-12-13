@@ -6,6 +6,7 @@ clear_proxy_and_file(){
     > /usr/local/etc/3proxy/3proxy.cfg
     > $WORKDIR/data.txt
     > $WORKDIR/proxy.txt
+    chmod +x ${WORKDIR}/boot_ifconfig_delete.sh $WORKDIR/boot_iptables_delete.sh
     bash $WORKDIR/boot_ifconfig_delete.sh
     bash $WORKDIR/boot_iptables_delete.sh
     > ${WORKDIR}/boot_iptables.sh
