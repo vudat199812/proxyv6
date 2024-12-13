@@ -13,6 +13,7 @@ install_3proxy() {
     URL="https://raw.githubusercontent.com/vudat199812/proxyv6/main/3proxy-3proxy-0.9.4.tar.gz"
     wget -qO- $URL | bsdtar -xvf-
     cd 3proxy-0.9.4
+    make -f Makefile.Linux
     make -f Makefile.unix-install
     cd $WORKDIR
     echo "install done"
