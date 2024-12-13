@@ -5,8 +5,11 @@ clear_proxy_and_file(){
 	
     > /usr/local/etc/3proxy/3proxy.cfg
     > $WORKDIR/data.txt
+    > $WORKDIR/proxy.txt
     bash $WORKDIR/boot_ifconfig_delete.sh
-	bash $WORKDIR/boot_iptables_delete.sh
+    bash $WORKDIR/boot_iptables_delete.sh
+    > ${WORKDIR}/boot_iptables.sh
+    > ${WORKDIR}/boot_ifconfig.sh
 }
 
 random() {
@@ -75,9 +78,6 @@ gen_ifconfig_delete() {
 $(awk -F "/" '{print "ifconfig eth0 inet6 del " $5 "/64"}' ${WORKDATA})
 EOF
 }
-chmod +x /etc/rc.d/rc.local
-systemctl enable rc-local
-systemctl start rc-local
 clear_proxy_and_file
 
 IP4=$(curl -4 -s icanhazip.com)
@@ -101,16 +101,9 @@ gen_ifconfig_delete >$WORKDIR/boot_ifconfig_delete.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.d/rc.local
 echo "gen_3proxy"
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
-
-
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
->/etc/rc.d/rc.local
-cat >>/etc/rc.d/rc.local <<EOF
-ulimit -n 10048
-/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
-EOF
-bash /etc/rc.d/rc.local
 echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
+systemctl restart 3proxy
 upload_proxy
