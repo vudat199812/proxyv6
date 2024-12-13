@@ -103,7 +103,6 @@ gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 ulimit -n 10048
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
-/usr/local/etc/3proxy/bin/3proxy /usr/local/etc/3proxy/3proxy.cfg
 echo "gen_proxy_file_for_user"
 gen_proxy_file_for_user
 systemctl restart NetworkManager
